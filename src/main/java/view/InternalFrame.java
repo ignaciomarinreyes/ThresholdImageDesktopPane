@@ -2,47 +2,53 @@ package view;
 
 import java.awt.Color;
 import java.awt.Point;
+import java.beans.PropertyVetoException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import model.Canvas;
 
 public class InternalFrame extends javax.swing.JInternalFrame {
-    
+
     private String path;
-    InternalFrame(String path) {
+    public static int CascadeH = 0;
+    public static int CascadeW = 0;
+
+    public InternalFrame(String path) {
         this.path = path;
         setLookAndFeel();
         initComponents();
-        this.setVisible(true);  
-        this.setLocation(new Point(0,0));
-        // this.setPreferredSize(new Dimension(300, 300));
+        this.setVisible(true);
+        this.setLocation(new Point(CascadeW, CascadeH));
+        CascadeH+=20;
+        CascadeW+=20;
         this.setMaximizable(true);
         this.setIconifiable(true);
         this.setClosable(true);
         this.setResizable(true);
         canvas.setBackground(new Color(240, 240, 240));
-
-        this.setTitle("Threshold Image - By Jesús Lárez & Ignacio Marín"); // to-do
-        
-
         canvas.setPath(path);
         if (canvas.loadImage()) {
             repaint();
-        }else{
-            System.out.println("Error");
         }
+        canvas.getNameImageFile();
+        this.setTitle(canvas.getNameImageFile());
+        
+
     }
-    public String getPath(){
+
+    public String getPath() {
         return this.path;
     }
-    
+
     public Canvas getCanvas() {
         return canvas;
     }
-    
-    public void umbralizar(int threshold){
+
+    public void ConverToBlackAndWhite(int threshold) {
         canvas.setThreshold(threshold);
         canvas.converToBlackAndWhite();
+        this.setTitle(canvas.getNameImageFile() + " Threshold: " + canvas.getThreshold());
     }
-    
 
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents

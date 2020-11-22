@@ -1,6 +1,10 @@
 package view;
 
+import java.awt.Point;
+import java.beans.PropertyVetoException;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -32,7 +36,7 @@ public class MainFrame extends javax.swing.JFrame {
         fileNameExtensionFilterSave = new FileNameExtensionFilter("jpeg", new String[]{"jpeg"});
         jFileChooserSave.addChoosableFileFilter(fileNameExtensionFilterSave);
         initComponents();
-        this.setSize(1200,900);
+        this.setSize(1200, 900);
         this.setLocationRelativeTo(null);
         this.setResizable(true);
         this.setTitle("Threshold Image - By Jesús Lárez & Ignacio Marín");
@@ -55,6 +59,12 @@ public class MainFrame extends javax.swing.JFrame {
         aboutJMenuItem = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+
+        jDesktopPane1.addComponentListener(new java.awt.event.ComponentAdapter() {
+            public void componentResized(java.awt.event.ComponentEvent evt) {
+                jDesktopPane1ComponentResized(evt);
+            }
+        });
 
         javax.swing.GroupLayout jDesktopPane1Layout = new javax.swing.GroupLayout(jDesktopPane1);
         jDesktopPane1.setLayout(jDesktopPane1Layout);
@@ -104,7 +114,7 @@ public class MainFrame extends javax.swing.JFrame {
         editJMenu.setText("Edit");
 
         convertJMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_B, java.awt.event.InputEvent.CTRL_DOWN_MASK));
-        convertJMenuItem.setText("ConvertToBlackAndWhite");
+        convertJMenuItem.setText("Convert to black and white");
         convertJMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 convertJMenuItemActionPerformed(evt);
@@ -155,6 +165,8 @@ public class MainFrame extends javax.swing.JFrame {
                     internalFrameArray.clear();
                 }
                 internalFrameOriginal.dispose();
+                InternalFrame.CascadeH = 0;
+                InternalFrame.CascadeW = 0;
             }
             internalFrameOriginal = new InternalFrame(jFileChooserOpen.getSelectedFile().getAbsolutePath());
             jDesktopPane1.add(internalFrameOriginal);
@@ -162,53 +174,84 @@ public class MainFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_openImageJMenuItemActionPerformed
 
     private void aboutJMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_aboutJMenuItemActionPerformed
-        JOptionPane.showMessageDialog(rootPane, "Threshold Image is based on Swing from the Java Library."
+        JOptionPane.showMessageDialog(rootPane, "ThresholdImageDesktopPane is based on Swing from the Java Library."
                 + "\nThe program thresholds an image from a given value. "
-                + "\nVersion 1.0 - GitHub information: https://github.com/jesuslarez/ThresholdImage");
+                + "\nVersion 1.0 - GitHub information: https://github.com/jesuslarez/ThresholdImageDesktopPane");
     }//GEN-LAST:event_aboutJMenuItemActionPerformed
 
     private void saveImageJMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveImageJMenuItemActionPerformed
         InternalFrame selectedFrame = (InternalFrame) jDesktopPane1.getSelectedFrame();
-        //Resolver casos
-        int res = jFileChooserSave.showSaveDialog(null);
-        if (res == JFileChooser.APPROVE_OPTION) {
-            
-            boolean saveImage = selectedFrame.getCanvas().saveImage(
-                    jFileChooserSave.getSelectedFile().getAbsolutePath(), 
-                    jFileChooserSave.getFileFilter().getDescription());
-        }     
-       
+        if (internalFrameOriginal == null) {
+            JOptionPane.showMessageDialog(rootPane, "You must load an image first");
+        } else if (selectedFrame == null) {
+            JOptionPane.showMessageDialog(rootPane, "You select an  InternalFrame first");
+        } else if (selectedFrame != internalFrameOriginal) {
+            int res = jFileChooserSave.showSaveDialog(null);
+            if (res == JFileChooser.APPROVE_OPTION) {
+                boolean saveImage = selectedFrame.getCanvas().saveImage(
+                        jFileChooserSave.getSelectedFile().getAbsolutePath(),
+                        jFileChooserSave.getFileFilter().getDescription());
+            }
+        } else if (internalFrameArray.isEmpty()) {
+            JOptionPane.showMessageDialog(rootPane, "You must convert and image to black and white first");
+        } else {
+            JOptionPane.showMessageDialog(rootPane, "You must select an InternalFrame different to the original Image");
+        }
+
+
     }//GEN-LAST:event_saveImageJMenuItemActionPerformed
 
     private void exitJMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exitJMenuItemActionPerformed
-        int res = JOptionPane.showConfirmDialog(rootPane, "Are you sure you wanna exit?" , "Exit", JOptionPane.YES_OPTION);
+        int res = JOptionPane.showConfirmDialog(rootPane, "Are you sure you wanna exit?", "Exit", JOptionPane.YES_OPTION);
         if (res == 0) {
             System.exit(0);
         }
     }//GEN-LAST:event_exitJMenuItemActionPerformed
 
     private void convertJMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_convertJMenuItemActionPerformed
-        String res = JOptionPane.showInputDialog(rootPane, "Introduce a threshold value between 0 and 255");
-        InternalFrame internalFrameConverted = null;
-        if (res != null) {
-            int value = 0;
-            try {
-                value = Integer.parseInt(res);
-            } catch (NumberFormatException numberFormatException) {
-                JOptionPane.showMessageDialog(rootPane, "The value must be numeric");
-                return;
+        if (internalFrameOriginal == null) {
+            JOptionPane.showMessageDialog(rootPane, "You must load an image first");
+        } else {
+            String res = JOptionPane.showInputDialog(rootPane, "Introduce a threshold value between 0 and 255");
+            InternalFrame internalFrameConverted = null;
+            if (res != null) {
+                int value = 0;
+                try {
+                    value = Integer.parseInt(res);
+                } catch (NumberFormatException numberFormatException) {
+                    JOptionPane.showMessageDialog(rootPane, "The value must be numeric");
+                    return;
+                }
+                if (value < 0 || value > 255) {
+                    JOptionPane.showMessageDialog(rootPane, "The threshold value must be between 0 and 255!");
+                } else {
+                    internalFrameConverted = new InternalFrame(internalFrameOriginal.getPath());
+                    internalFrameConverted.ConverToBlackAndWhite(value);
+                    jDesktopPane1.add(internalFrameConverted);
+                    internalFrameArray.add(internalFrameConverted);
+                    try {
+                        internalFrameConverted.setSelected(true);
+                    } catch (PropertyVetoException ex) {
+                        Logger.getLogger(InternalFrame.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
             }
-            if (value < 0 || value > 255) {
-                JOptionPane.showMessageDialog(rootPane, "The threshold value must be between 0 and 255!");
-            } else {
-                internalFrameConverted = new InternalFrame(internalFrameOriginal.getPath());  
-                internalFrameConverted.umbralizar(value);
-                jDesktopPane1.add(internalFrameConverted);
-                internalFrameArray.add(internalFrameConverted);
-            }
-
-        }        
+        }
     }//GEN-LAST:event_convertJMenuItemActionPerformed
+
+    private void jDesktopPane1ComponentResized(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_jDesktopPane1ComponentResized
+        if (internalFrameOriginal != null) {
+            internalFrameOriginal.setLocation(0, 0);
+            int x = 0;
+            int y = 0;
+            for (InternalFrame internalFrame : internalFrameArray) {
+                internalFrame.setLocation(new Point(x, y));
+                x += 20;
+                y += 20;
+            }
+        }
+
+    }//GEN-LAST:event_jDesktopPane1ComponentResized
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenuItem aboutJMenuItem;
