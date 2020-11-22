@@ -22,6 +22,7 @@ public class Canvas extends JPanel {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
+        this.setPreferredSize(new Dimension(image.getWidth(), image.getHeight()));
         g.drawImage(image, 0, 0, null);
 
     }

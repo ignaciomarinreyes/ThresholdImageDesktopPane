@@ -1,5 +1,6 @@
 package view;
 
+import java.util.ArrayList;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -7,7 +8,8 @@ import org.opencv.core.Core;
 
 public class MainFrame extends javax.swing.JFrame {
 
-    private InternalFrame internalFrame;
+    private InternalFrame internalFrameOriginal;
+    private ArrayList<InternalFrame> internalFrameArray = new ArrayList<InternalFrame>();
     private final JFileChooser jFileChooserOpen;
     private final JFileChooser jFileChooserSave;
     private FileNameExtensionFilter fileNameExtensionFilterOpen;
@@ -30,9 +32,9 @@ public class MainFrame extends javax.swing.JFrame {
         fileNameExtensionFilterSave = new FileNameExtensionFilter("jpeg", new String[]{"jpeg"});
         jFileChooserSave.addChoosableFileFilter(fileNameExtensionFilterSave);
         initComponents();
-        
+        this.setSize(1200,900);
         this.setLocationRelativeTo(null);
-        this.setResizable(false);
+        this.setResizable(true);
         this.setTitle("Threshold Image - By Jesús Lárez & Ignacio Marín");
     }
 
@@ -48,7 +50,7 @@ public class MainFrame extends javax.swing.JFrame {
         jSeparator1 = new javax.swing.JPopupMenu.Separator();
         exitJMenuItem = new javax.swing.JMenuItem();
         editJMenu = new javax.swing.JMenu();
-        jMenuItem1 = new javax.swing.JMenuItem();
+        convertJMenuItem = new javax.swing.JMenuItem();
         helpJMenu = new javax.swing.JMenu();
         aboutJMenuItem = new javax.swing.JMenuItem();
 
@@ -101,14 +103,14 @@ public class MainFrame extends javax.swing.JFrame {
         editJMenu.setMnemonic('e');
         editJMenu.setText("Edit");
 
-        jMenuItem1.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_B, java.awt.event.InputEvent.CTRL_DOWN_MASK));
-        jMenuItem1.setText("ConvertToBlackAndWhite");
-        jMenuItem1.addActionListener(new java.awt.event.ActionListener() {
+        convertJMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_B, java.awt.event.InputEvent.CTRL_DOWN_MASK));
+        convertJMenuItem.setText("ConvertToBlackAndWhite");
+        convertJMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jMenuItem1ActionPerformed(evt);
+                convertJMenuItemActionPerformed(evt);
             }
         });
-        editJMenu.add(jMenuItem1);
+        editJMenu.add(convertJMenuItem);
 
         mainFrameJMenuBar.add(editJMenu);
 
@@ -145,11 +147,17 @@ public class MainFrame extends javax.swing.JFrame {
     private void openImageJMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_openImageJMenuItemActionPerformed
         int res = jFileChooserOpen.showOpenDialog(null);
         if (res == JFileChooser.APPROVE_OPTION) {
-            if (internalFrame != null) {
-                internalFrame.dispose();
+            if (internalFrameOriginal != null) {
+                if (!internalFrameArray.isEmpty()) {
+                    for (InternalFrame internalFrame : internalFrameArray) {
+                        internalFrame.dispose();
+                    }
+                    internalFrameArray.clear();
+                }
+                internalFrameOriginal.dispose();
             }
-            internalFrame = new InternalFrame(jFileChooserOpen.getSelectedFile().getAbsolutePath());
-            jDesktopPane1.add(internalFrame);
+            internalFrameOriginal = new InternalFrame(jFileChooserOpen.getSelectedFile().getAbsolutePath());
+            jDesktopPane1.add(internalFrameOriginal);
         }
     }//GEN-LAST:event_openImageJMenuItemActionPerformed
 
@@ -160,15 +168,15 @@ public class MainFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_aboutJMenuItemActionPerformed
 
     private void saveImageJMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveImageJMenuItemActionPerformed
-       /* int res = jFileChooserSave.showSaveDialog(null);
+        InternalFrame selectedFrame = (InternalFrame) jDesktopPane1.getSelectedFrame();
+        //Resolver casos
+        int res = jFileChooserSave.showSaveDialog(null);
         if (res == JFileChooser.APPROVE_OPTION) {
-            boolean saveImage = canvas.saveImage(jFileChooserSave.getSelectedFile().getAbsolutePath(), jFileChooserSave.getFileFilter().getDescription());
-            System.out.println("saved: " + saveImage);
-        }
-        if (res == JFileChooser.CANCEL_OPTION) {
-
-        }
-        */
+            
+            boolean saveImage = selectedFrame.getCanvas().saveImage(
+                    jFileChooserSave.getSelectedFile().getAbsolutePath(), 
+                    jFileChooserSave.getFileFilter().getDescription());
+        }     
        
     }//GEN-LAST:event_saveImageJMenuItemActionPerformed
 
@@ -179,18 +187,37 @@ public class MainFrame extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_exitJMenuItemActionPerformed
 
-    private void jMenuItem1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem1ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jMenuItem1ActionPerformed
+    private void convertJMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_convertJMenuItemActionPerformed
+        String res = JOptionPane.showInputDialog(rootPane, "Introduce a threshold value between 0 and 255");
+        InternalFrame internalFrameConverted = null;
+        if (res != null) {
+            int value = 0;
+            try {
+                value = Integer.parseInt(res);
+            } catch (NumberFormatException numberFormatException) {
+                JOptionPane.showMessageDialog(rootPane, "The value must be numeric");
+                return;
+            }
+            if (value < 0 || value > 255) {
+                JOptionPane.showMessageDialog(rootPane, "The threshold value must be between 0 and 255!");
+            } else {
+                internalFrameConverted = new InternalFrame(internalFrameOriginal.getPath());  
+                internalFrameConverted.umbralizar(value);
+                jDesktopPane1.add(internalFrameConverted);
+                internalFrameArray.add(internalFrameConverted);
+            }
+
+        }        
+    }//GEN-LAST:event_convertJMenuItemActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenuItem aboutJMenuItem;
+    private javax.swing.JMenuItem convertJMenuItem;
     private javax.swing.JMenu editJMenu;
     private javax.swing.JMenuItem exitJMenuItem;
     private javax.swing.JMenu fileJMenu;
     private javax.swing.JMenu helpJMenu;
     private javax.swing.JDesktopPane jDesktopPane1;
-    private javax.swing.JMenuItem jMenuItem1;
     private javax.swing.JPopupMenu.Separator jSeparator1;
     private javax.swing.JMenuBar mainFrameJMenuBar;
     private javax.swing.JMenuItem openImageJMenuItem;

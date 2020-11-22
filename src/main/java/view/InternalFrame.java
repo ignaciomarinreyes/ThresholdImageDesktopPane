@@ -1,25 +1,27 @@
 package view;
 
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.Point;
+import model.Canvas;
 
 public class InternalFrame extends javax.swing.JInternalFrame {
     
-    
+    private String path;
     InternalFrame(String path) {
+        this.path = path;
         setLookAndFeel();
         initComponents();
         this.setVisible(true);  
         this.setLocation(new Point(0,0));
-        this.setPreferredSize(new Dimension(300, 300));
+        // this.setPreferredSize(new Dimension(300, 300));
         this.setMaximizable(true);
         this.setIconifiable(true);
         this.setClosable(true);
         this.setResizable(true);
         canvas.setBackground(new Color(240, 240, 240));
 
-        this.setTitle("Threshold Image - By Jesús Lárez & Ignacio Marín");
+        this.setTitle("Threshold Image - By Jesús Lárez & Ignacio Marín"); // to-do
+        
 
         canvas.setPath(path);
         if (canvas.loadImage()) {
@@ -27,6 +29,18 @@ public class InternalFrame extends javax.swing.JInternalFrame {
         }else{
             System.out.println("Error");
         }
+    }
+    public String getPath(){
+        return this.path;
+    }
+    
+    public Canvas getCanvas() {
+        return canvas;
+    }
+    
+    public void umbralizar(int threshold){
+        canvas.setThreshold(threshold);
+        canvas.converToBlackAndWhite();
     }
     
 
@@ -80,4 +94,5 @@ public class InternalFrame extends javax.swing.JInternalFrame {
     private model.Canvas canvas;
     private javax.swing.JScrollPane jScrollPane;
     // End of variables declaration//GEN-END:variables
+
 }
