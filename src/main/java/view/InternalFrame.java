@@ -2,9 +2,6 @@ package view;
 
 import java.awt.Color;
 import java.awt.Point;
-import java.beans.PropertyVetoException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import model.Canvas;
 
 public class InternalFrame extends javax.swing.JInternalFrame {
@@ -19,8 +16,8 @@ public class InternalFrame extends javax.swing.JInternalFrame {
         initComponents();
         this.setVisible(true);
         this.setLocation(new Point(CascadeW, CascadeH));
-        CascadeH+=20;
-        CascadeW+=20;
+        CascadeH += 20;
+        CascadeW += 20;
         this.setMaximizable(true);
         this.setIconifiable(true);
         this.setClosable(true);
@@ -32,8 +29,6 @@ public class InternalFrame extends javax.swing.JInternalFrame {
         }
         canvas.getNameImageFile();
         this.setTitle(canvas.getNameImageFile());
-        
-
     }
 
     public String getPath() {

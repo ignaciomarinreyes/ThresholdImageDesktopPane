@@ -19,7 +19,7 @@ public class Canvas extends JPanel {
     private BufferedImage image = null;
     private int threshold = -1;
     private File imageFile;
-    
+
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
@@ -32,7 +32,7 @@ public class Canvas extends JPanel {
         try {
             imageFile = new File(path);
             image = ImageIO.read(imageFile);
-        
+
             if (image.getWidth() > 1024 || image.getHeight() > 768) {
                 return false;
             }
@@ -42,9 +42,10 @@ public class Canvas extends JPanel {
         }
         return true;
     }
-    public boolean saveImage(String path, String format){
+
+    public boolean saveImage(String path, String format) {
         try {
-            ImageIO.write(image, format , new File(path + "."+ format));
+            ImageIO.write(image, format, new File(path + "." + format));
             return true;
         } catch (IOException ex) {
             Logger.getLogger(Canvas.class.getName()).log(Level.SEVERE, null, ex);
@@ -52,8 +53,10 @@ public class Canvas extends JPanel {
         }
     }
 
-    public BufferedImage getImage() {
-        return image;
+    public void converToBlackAndWhite() {
+
+        Mat mat = UtilsPractica6.umbralizar(Imgcodecs.imread(path), threshold);
+        image = (BufferedImage) HighGui.toBufferedImage(mat);
     }
 
     public void setPath(String path) {
@@ -68,13 +71,7 @@ public class Canvas extends JPanel {
         return threshold;
     }
 
-    public void converToBlackAndWhite() {
-
-        Mat mat = UtilsPractica6.umbralizar(Imgcodecs.imread(path), threshold);
-        image = (BufferedImage) HighGui.toBufferedImage(mat);
-    }
-    
-    public String getNameImageFile(){
+    public String getNameImageFile() {
         return imageFile.getName();
     }
 }

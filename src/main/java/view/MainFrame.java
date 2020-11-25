@@ -39,7 +39,7 @@ public class MainFrame extends javax.swing.JFrame {
         this.setSize(1200, 900);
         this.setLocationRelativeTo(null);
         this.setResizable(true);
-        this.setTitle("Threshold Image - By Jesús Lárez & Ignacio Marín");
+        this.setTitle("Threshold Image DesktopPane - By Jesús Lárez & Ignacio Marín");
     }
 
     @SuppressWarnings("unchecked")
@@ -197,8 +197,6 @@ public class MainFrame extends javax.swing.JFrame {
         } else {
             JOptionPane.showMessageDialog(rootPane, "You must select an InternalFrame different to the original Image");
         }
-
-
     }//GEN-LAST:event_saveImageJMenuItemActionPerformed
 
     private void exitJMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exitJMenuItemActionPerformed
